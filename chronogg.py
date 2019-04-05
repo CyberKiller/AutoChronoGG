@@ -135,16 +135,18 @@ def main():
         config = get_config_from_file()
         if config_exists():
             if not config:
-                logging.info(f'An error occurred while trying to load the config from file.'
-                             f' Check the JSON syntax in {CONFIG_FILE_NAME}.')
+                CONFIG_ERR_STR = (f'An error occurred while trying to load the config from file.'
+                                  f' Check the JSON syntax in {CONFIG_FILE_NAME}.')
+                logging.info(CONFIG_ERR_STR)
                 return
         if len(sys.argv) < 2:
             gg_cookie = get_cookie_from_file()
             if not gg_cookie or len(gg_cookie) < 1:
-                logging.info('<<<AutoChronoGG>>>')
-                logging.info('Usage: ./chronogg.py <Authorization Token>')
-                logging.info('Please read the README.md and follow the instructions on '
-                             'how to extract your authorization token.')
+                MISSING_TOKEN_ERR_STR = ('<<<AutoChronoGG>>>\n'
+                                         'Usage: ./chronogg.py <Authorization Token>\n'
+                                         'Please read the README.md and follow the instructions on '
+                                         'how to extract your authorization token.')
+                logging.info(MISSING_TOKEN_ERR_STR)
                 return
         else:
             gg_cookie = sys.argv[1]
@@ -154,12 +156,15 @@ def main():
             logging.info('An unknown error occurred while fetching results. Terminating...')
             return
         elif results == ALREADY_CLICKED_CODE:
-            logging.info('An error occurred while fetching results: Coin already clicked. Terminating...')
+            ALREADY_CLICKED_ERR_STR = ('An error occurred while fetching results: Coin already clicked.'
+                                       'Terminating...')
+            logging.info(ALREADY_CLICKED_ERR_STR)
             save_cookie(gg_cookie)
             return
         elif results == UNAUTHORIZED:
-            logging.info('An error occurred while fetching results: Expired/invalid authorization token.'
-                         ' Terminating...')
+            UNAUTHORIZED_ERR_STR = ('An error occurred while fetching results: Expired/invalid authorization token.'
+                                    ' Terminating...')
+            logging.info(UNAUTHORIZED_ERR_STR)
             if config and config['email']['enabled']:
                 recipients = []
                 for email in config['email']['to']:
