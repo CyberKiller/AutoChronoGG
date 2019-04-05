@@ -3,3 +3,6 @@
 .config
 __pycache__/
 *.log
+client_secret.json
+.vscode
+.venv
