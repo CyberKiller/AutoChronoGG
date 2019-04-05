@@ -119,15 +119,28 @@ def config_exists():
     return os.path.exists(CONFIG_FILE_NAME)
 
 
-def send_mail(to, subject, message, frm, host):
-    msg = EmailMessage()
-    msg['Subject'] = subject
-    msg['From'] = frm['name'] + ' <' + frm['address'] + '>'
-    msg['To'] = ', '.join(to)
-    msg.set_content(message)
-    server = smtplib.SMTP(host)
-    server.send_message(msg)
-    server.quit()
+def send_mail(config, subject, message):
+    if config and config['email']['enabled']:
+        recipients = []
+        for email in config['email']['to']:
+            recipients.append(email['name'] + ' <' + email['address'] + '>')
+        frm = {
+            'name': config['email']['from']['name'],
+            'address': config['email']['from']['address']
+        }
+        try:
+            msg = EmailMessage()
+            msg['Subject'] = subject
+            msg['From'] = frm['name'] + ' <' + frm['address'] + '>'
+            msg['To'] = ', '.join(recipients)
+            msg.set_content(message)
+            server = smtplib.SMTP(config['email']['server'])
+            server.send_message(msg)
+            server.quit()
+        except:
+            logging.info('An error occurred while sending an e-mail alert.'
+                         ' Please check your configuration file or your mail server.')
+            raise
 
 
 def main():
@@ -138,6 +151,7 @@ def main():
                 CONFIG_ERR_STR = (f'An error occurred while trying to load the config from file.'
                                   f' Check the JSON syntax in {CONFIG_FILE_NAME}.')
                 logging.info(CONFIG_ERR_STR)
+                send_mail(config=config, subject='AutoChronoGG: Config error', message=CONFIG_ERR_STR)
                 return
         if len(sys.argv) < 2:
             gg_cookie = get_cookie_from_file()
@@ -147,6 +161,7 @@ def main():
                                          'Please read the README.md and follow the instructions on '
                                          'how to extract your authorization token.')
                 logging.info(MISSING_TOKEN_ERR_STR)
+                send_mail(config=config, subject='AutoChronoGG: Missing token', message=MISSING_TOKEN_ERR_STR)
                 return
         else:
             gg_cookie = sys.argv[1]
@@ -160,27 +175,13 @@ def main():
                                        'Terminating...')
             logging.info(ALREADY_CLICKED_ERR_STR)
             save_cookie(gg_cookie)
+            send_mail(config=config, subject='AutoChronoGG: Coin already clicked', message=ALREADY_CLICKED_ERR_STR)
             return
         elif results == UNAUTHORIZED:
             UNAUTHORIZED_ERR_STR = ('An error occurred while fetching results: Expired/invalid authorization token.'
                                     ' Terminating...')
             logging.info(UNAUTHORIZED_ERR_STR)
-            if config and config['email']['enabled']:
-                recipients = []
-                for email in config['email']['to']:
-                    recipients.append(email['name'] + ' <' + email['address'] + '>')
-                frm = {
-                    'name': config['email']['from']['name'],
-                    'address': config['email']['from']['address']
-                }
-                try:
-                    send_mail(to=recipients, subject='AutoChronoGG: Invalid token',
-                              message='An error occurred while fetching results: Expired/invalid authorization token.'
-                                      ' Terminating...',
-                              frm=frm, host=config['email']['server'])
-                except:
-                    logging.info('An error occurred while sending an e-mail alert.'
-                                 ' Please check your configuration file or your mail server.')
+            send_mail(config=config, subject='AutoChronoGG: Invalid token', message=UNAUTHORIZED_ERR_STR)
             return
         logging.info('Done.')
         save_cookie(gg_cookie)
