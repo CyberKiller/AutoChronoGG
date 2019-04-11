@@ -2,6 +2,10 @@
   "email": {
     "enabled": false,
     "server": "localhost",
+    "gmail": {
+      "enabled": false,
+      "console_oauth": true
+    },
     "from": {
       "name": "AutoChronoGG",
       "address": "no-reply@example.com"
