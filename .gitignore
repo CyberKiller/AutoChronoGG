@@ -6,4 +6,4 @@ __pycache__/
 *.json
 .vscode
 .venv
-token.pickle
+.gmail_token.pickle

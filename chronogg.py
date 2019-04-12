@@ -17,7 +17,7 @@ import urllib.request
 from email.message import EmailMessage
 from io import BytesIO
 
-#gmail api stuff
+#gmail api code
 import pickle
 import os.path
 from googleapiclient.discovery import build
@@ -29,17 +29,19 @@ from apiclient import errors, discovery
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-CREDENTIALS_FILE_NAME = 'credentials.json'
+CREDENTIALS_FILE_NAME = '.gmail_credentials.json'
+
 
 def init_gmail(config):
     """Gets a gmail service object.
     """
+    TOKENPICKLE_FILE_NAME = '.gmail_token.pickle'
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(TOKENPICKLE_FILE_NAME):
+        with open(TOKENPICKLE_FILE_NAME, 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -48,16 +50,19 @@ def init_gmail(config):
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 CREDENTIALS_FILE_NAME, SCOPES)
+            set_windows_hidden_file(CREDENTIALS_FILE_NAME)
             if config['email']['gmail']['console_oauth']:
                 creds = flow.run_console()
             else:
                 creds = flow.run_local_server()
         # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
+        with open(TOKENPICKLE_FILE_NAME, 'wb') as token:
             pickle.dump(creds, token)
+            set_windows_hidden_file(TOKENPICKLE_FILE_NAME)
 
     service = build('gmail', 'v1', credentials=creds)
     return service
+
 
 def create_message(sender, to, subject, message_text):
     """Create a message for an email.
@@ -78,6 +83,7 @@ def create_message(sender, to, subject, message_text):
     raw = base64.urlsafe_b64encode(message.as_bytes())
     return {'raw': raw.decode()}
 
+
 def send_message(service, user_id, message):
     """Send an email message.
 
@@ -96,8 +102,31 @@ def send_message(service, user_id, message):
         return message
     except errors.HttpError as error:
         logging.warning('An error occurred: ' + error)
+#end of gmail api code
 
-#end of gmail api stuff
+
+def set_windows_hidden_file(filename, hidden = True):
+    # https://stackoverflow.com/questions/25432139/python-cross-platform-hidden-file
+    # Just Windows things
+    if os.name != 'nt': return
+    if not os.path.isfile(filename): return
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    INVALID_FILE_ATTRIBUTES = -1
+    FILE_ATTRIBUTE_HIDDEN = 2
+    FILE_ATTRIBUTE_UNHIDE = ~FILE_ATTRIBUTE_HIDDEN
+    attrs = kernel32.GetFileAttributesW(filename)
+    try:
+        if attrs == INVALID_FILE_ATTRIBUTES:
+            raise ctypes.WinError(ctypes.get_last_error())
+        if hidden:
+            attrs |= FILE_ATTRIBUTE_HIDDEN
+        else:
+            attrs &= FILE_ATTRIBUTE_UNHIDE
+        if not kernel32.SetFileAttributesW(filename, attrs): 
+            raise ctypes.WinError(ctypes.get_last_error())
+    except OSError as e:
+        logging.warning(f'Could not set file attributes for "{filename}". Error returned: ' + str(e))
+        
 
 MAIN_URL = 'https://chrono.gg'
 POST_URL = 'https://api.chrono.gg/quest/spin'
@@ -169,16 +198,10 @@ def get_web_page(url, headers, cookies):
 
 
 def save_cookie(cookie):
-    # https://stackoverflow.com/questions/25432139/python-cross-platform-hidden-file
-    # Just Windows things
-    if os.name == 'nt':
-        ret = ctypes.windll.kernel32.SetFileAttributesW(COOKIE_FILE_NAME, 0)
-
+    set_windows_hidden_file(COOKIE_FILE_NAME, hidden=False)
     with open(COOKIE_FILE_NAME, 'w') as f:
         f.write(cookie)
-
-    if os.name == 'nt':
-        ret = ctypes.windll.kernel32.SetFileAttributesW(COOKIE_FILE_NAME, 2)
+    set_windows_hidden_file(COOKIE_FILE_NAME)
 
 
 def get_cookie_from_file():
