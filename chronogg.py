@@ -48,6 +48,7 @@ def init_gmail(config):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            set_windows_hidden_file(CREDENTIALS_FILE_NAME, hidden=False)
             flow = InstalledAppFlow.from_client_secrets_file(
                 CREDENTIALS_FILE_NAME, SCOPES)
             set_windows_hidden_file(CREDENTIALS_FILE_NAME)
@@ -56,6 +57,7 @@ def init_gmail(config):
             else:
                 creds = flow.run_local_server()
         # Save the credentials for the next run
+        set_windows_hidden_file(TOKENPICKLE_FILE_NAME, hidden=False)
         with open(TOKENPICKLE_FILE_NAME, 'wb') as token:
             pickle.dump(creds, token)
             set_windows_hidden_file(TOKENPICKLE_FILE_NAME)
