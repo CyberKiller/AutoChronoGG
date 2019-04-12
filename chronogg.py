@@ -103,7 +103,7 @@ def send_message(service, user_id, message):
         logging.info('Message Id: ' + message['id'])
         return message
     except errors.HttpError as error:
-        logging.warning('An error occurred: ' + error)
+        logging.warning('An error occurred: ' + str(error))
 #end of gmail api code
 
 
