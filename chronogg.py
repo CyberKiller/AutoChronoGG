@@ -62,7 +62,7 @@ def init_gmail(config):
             pickle.dump(creds, token)
             set_windows_hidden_file(TOKENPICKLE_FILE_NAME)
 
-    service = build('gmail', 'v1', credentials=creds)
+    service = build('gmail', 'v1', credentials=creds, cache_discovery=False)
     return service
 
 
@@ -102,8 +102,8 @@ def send_message(service, user_id, message):
         message = (service.users().messages().send(userId=user_id, body=message).execute())
         logging.info('Message Id: ' + message['id'])
         return message
-    except errors.HttpError as error:
-        logging.warning('An error occurred: ' + str(error))
+    except errors.HttpError as e:
+        logging.warning('An error occurred: ' + str(e))
 #end of gmail api code
 
 
