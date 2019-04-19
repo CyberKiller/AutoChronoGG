@@ -38,6 +38,8 @@ Use this to send emails using Gmail's oauth API instead.
 3. Set `email.gmail.console_oauth` to `false` to enable easier browser based authorisation flow. Set to `true` for console based authorisation flow if the system doesn't have have a desktop or web browser.
 4. Run the script once without any arguments or input and follow the instructions in the console to complete the authorisation flow.
 
+**Note:** The from address will always be the gmail account used to setup the script.
+
 ## Optional: Crontab
 
 This script is meant to be run once per day, so here goes a crontab example for the lazy:
