@@ -33,6 +33,7 @@ In order to obtain your Authorization Token, you must follow these steps:
 1. Enable by setting `email.gmail.enabled` to `true` in `.config`.
 2. Go to <https://developers.google.com/gmail/api/quickstart/python>, complete step 1 and save `credentials.json` as `.gmail_credentials.json` to the same directory as this script. Then pip install the requirements in step 2.
 3. Set `email.gmail.console_oauth` to `false` to enable easier browser based authorisation flow. Set to `true` for console based authorisation flow if the system doesn't have have a desktop or web browser.
+4. Run the script once without any arguments or input and follow the instructions in the console to complete the authorisation flow.
 
 ## Optional: Crontab
 
