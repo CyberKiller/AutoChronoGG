@@ -1,6 +1,7 @@
 # AutoChronoGG
 
 A Python script to automatically get the daily coins on Chrono.gg
+This fork has added support for the Gmail oauth API.
 
 ## Requirements
 
@@ -29,6 +30,8 @@ In order to obtain your Authorization Token, you must follow these steps:
 * Enable by setting `email.enabled` to `true` in `.config`.
 
 ### Gmail oauth API
+
+Use this to send emails using Gmail's oauth API instead.
 
 1. Enable by setting `email.gmail.enabled` to `true` in `.config`.
 2. Go to <https://developers.google.com/gmail/api/quickstart/python>, complete step 1 and save `credentials.json` as `.gmail_credentials.json` to the same directory as this script. Then pip install the requirements in step 2.
