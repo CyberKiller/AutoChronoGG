@@ -1,5 +1,7 @@
 # AutoChronoGG
 
+## Notice: Chrono.gg closed their coin store so this script won't work anymore.
+
 A Python script to automatically get the daily coins on Chrono.gg
 This fork has added support for the Gmail oauth API.
 
